@@ -1,0 +1,182 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Cycle Notes</title>
+  <meta name="description" content="A private menstrual and symptom tracker that links your logs to research.">
+  <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+  <header class="top">
+    <div class="brand">
+      <h1>Cycle Notes</h1>
+      <p id="since-removal" class="muted small"></p>
+    </div>
+    <nav class="tabs" role="tablist">
+      <button role="tab" data-tab="log" class="active">Log</button>
+      <button role="tab" data-tab="calendar">Calendar</button>
+      <button role="tab" data-tab="patterns">Patterns</button>
+      <button role="tab" data-tab="research">Symptoms &amp; research</button>
+      <button role="tab" data-tab="me">Me &amp; report</button>
+    </nav>
+  </header>
+
+  <main>
+    <div id="alerts"></div>
+
+    <!-- LOG -->
+    <section id="tab-log" class="tab active">
+      <div class="card">
+        <div class="row between">
+          <button class="ghost" id="prev-day" aria-label="Previous day">&larr;</button>
+          <input type="date" id="log-date">
+          <button class="ghost" id="next-day" aria-label="Next day">&rarr;</button>
+        </div>
+        <p id="log-phase" class="muted small center"></p>
+      </div>
+
+      <div class="card">
+        <h2>Bleeding</h2>
+        <div class="chips" id="flow-chips"></div>
+      </div>
+
+      <div class="card">
+        <div class="row between">
+          <h2>Symptoms</h2>
+          <span class="muted small">Tap to log &middot; tap again to raise severity &middot; 4th tap clears</span>
+        </div>
+        <input type="search" id="symptom-filter" placeholder="Filter symptoms…">
+        <div id="symptom-groups"></div>
+        <form id="add-symptom" class="add-symptom">
+          <h3>Something not listed?</h3>
+          <input id="new-sym-name" required maxlength="60" placeholder="Name it, e.g. 'tingling in hands'">
+          <textarea id="new-sym-desc" rows="2" maxlength="600" placeholder="Describe it in your own words (optional). When does it happen, and what does it feel like?"></textarea>
+          <button type="submit">Add &amp; find research</button>
+        </form>
+      </div>
+
+      <div class="card grid2">
+        <label>Stress today <output id="stress-out">–</output>
+          <input type="range" id="stress" min="0" max="5" step="1">
+        </label>
+        <label>Mood <output id="mood-out">–</output>
+          <input type="range" id="mood" min="1" max="5" step="1">
+        </label>
+        <label>Sleep (hours)
+          <input type="number" id="sleep" min="0" max="16" step="0.5" inputmode="decimal">
+        </label>
+        <label>Pregnancy test
+          <select id="ptest">
+            <option value="">—</option>
+            <option value="neg">Negative</option>
+            <option value="pos">Positive</option>
+          </select>
+        </label>
+      </div>
+
+      <div class="card">
+        <h2>Notes</h2>
+        <textarea id="notes" rows="3" placeholder="Anything else: deadlines, travel, illness, exercise, what you ate…"></textarea>
+        <p class="muted small" id="saved-msg">Saved automatically on this device.</p>
+      </div>
+    </section>
+
+    <!-- CALENDAR -->
+    <section id="tab-calendar" class="tab">
+      <div class="card">
+        <div class="row between">
+          <button class="ghost" id="cal-prev">&larr;</button>
+          <h2 id="cal-title"></h2>
+          <button class="ghost" id="cal-next">&rarr;</button>
+        </div>
+        <div class="cal" id="cal"></div>
+        <div class="legend small">
+          <span><i class="sw flow-heavy"></i>Period</span>
+          <span><i class="sw flow-spotting"></i>Spotting</span>
+          <span><i class="sw predicted"></i>Predicted period</span>
+          <span><i class="sw ovu"></i>Estimated ovulation window</span>
+          <span><i class="dot"></i>Symptoms logged</span>
+        </div>
+        <p class="muted small">Predictions are rough estimates from your own past cycles. <strong>Don't use them as contraception.</strong></p>
+      </div>
+      <div class="card">
+        <h2>Cycles</h2>
+        <div id="cycle-list"></div>
+      </div>
+    </section>
+
+    <!-- PATTERNS -->
+    <section id="tab-patterns" class="tab">
+      <div class="card">
+        <h2>Is it hormonal?</h2>
+        <p class="small">Each symptom is matched against the cycle phase you were in when you logged it.
+          Symptoms that keep landing in the same phase, cycle after cycle, are <em>likely</em> hormonal.
+          Symptoms spread evenly across your cycle, or that follow your stress level, more likely have another cause, like stress or sleep. They can also be something to check with a doctor.</p>
+        <div id="pattern-table"></div>
+      </div>
+      <div class="card">
+        <h2>Stress vs symptoms</h2>
+        <div id="stress-summary"></div>
+      </div>
+    </section>
+
+    <!-- RESEARCH -->
+    <section id="tab-research" class="tab">
+      <div class="card">
+        <label>Symptom
+          <select id="research-select"></select>
+        </label>
+      </div>
+      <div id="research-body"></div>
+      <div class="card safety">
+        <h2>Get help now if you have…</h2>
+        <ul id="red-flag-list"></ul>
+        <p class="small">Call your local emergency number, or go to an emergency department.</p>
+      </div>
+    </section>
+
+    <!-- ME -->
+    <section id="tab-me" class="tab">
+      <div class="card">
+        <h2>Contraception history</h2>
+        <div id="history-list"></div>
+        <form id="history-form" class="grid3">
+          <input id="h-label" required placeholder="e.g. Combined pill">
+          <input id="h-from" type="date" required title="From">
+          <input id="h-to" type="date" title="To (blank = ongoing)">
+          <button type="submit">Add</button>
+        </form>
+        <label class="mt">Implant removed on (or the date you stopped your last method)
+          <input type="date" id="removal-date">
+        </label>
+      </div>
+
+      <div class="card">
+        <h2>Doctor summary</h2>
+        <p class="small">A one-page printable summary of your cycles, symptom patterns and flags, to take to a GP or gynaecologist.</p>
+        <button id="make-report">Open printable summary</button>
+      </div>
+
+      <div class="card">
+        <h2>Your data</h2>
+        <p class="small">Everything is stored only in this browser on this device. Nothing is uploaded. The only thing sent anywhere is the <em>search terms</em> you use on the research page, which go to Europe PMC, a free public database of medical papers. Export regularly to keep a backup.</p>
+        <div class="row wrap">
+          <button id="export">Export backup (.json)</button>
+          <label class="button-like">Import backup<input type="file" id="import" accept="application/json" hidden></label>
+          <button id="wipe" class="danger">Delete all data</button>
+        </div>
+      </div>
+
+      <div class="card">
+        <p class="small muted">Cycle Notes is a personal tracking tool, not a medical device. It can't diagnose anything. Use it to notice patterns and to have better conversations with a clinician.</p>
+      </div>
+    </section>
+  </main>
+
+  <div id="report" class="report" hidden></div>
+
+  <script src="js/knowledge.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>
